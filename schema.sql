@@ -12,7 +12,7 @@ CREATE TABLE watchlists (
 
 CREATE TABLE media (
   id serial PRIMARY KEY,
-  name varchar(50) NOT NULL,
+  name varchar(100) NOT NULL,
   platform varchar(50) NOT NULL,
   url text,
   watchlist_id int NOT NULL REFERENCES watchlists (id) ON DELETE CASCADE

@@ -1,0 +1,22 @@
+<ul>
+  <% @watchlists.each do |row| %>
+    <li>
+      <a href="/watchlist/<%= row[:id] %>"><%= row[:name] %></a>
+      <a href="/watchlist/<%= row[:id] %>/rename">Rename</a>
+      <form action="/watchlist/<%= row[:id] %>/delete" method="post">
+        <button>Delete</button>
+      </form>
+    </li>
+  <% end %>
+</ul>
+
+<form action="/new_watchlist" method="post">
+  <p>Create new watchlist</p>
+  <fieldset>
+    <div>
+      <label for="name">Name: </label>
+      <input id="name" name="name" type="text" value="<%= params[:name] %>" required>
+    </div>
+    <button>Create watch list</button>
+  </fieldset>
+</form>

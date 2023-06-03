@@ -1,14 +1,11 @@
 # ALL METHODS NEED TESTED!!!!!
 
-# Do media.rb and watchlist.rb need required in this file?
-
-
 require 'pg'
 
 class DatabasePersistence
   def initialize(logger)
-    @database = PG.connect(dbname: "media_watchlist"
-    @logger = logger)
+    @database = PG.connect(dbname: "media_watchlist")
+    @logger = logger
   end
 
   # USER RELATED METHODS - may need to refine later!!!!!!
@@ -16,7 +13,7 @@ class DatabasePersistence
   def create_user(name, password)
     sql = "INSERT INTO users (name, password) VALUES ($1, $2);"
 
-    query(sql, [name, password])
+    query(sql, name, password)
   end
 
 # may need to add a method to retrieve all usernames? Or to check if a username already exists?
@@ -28,22 +25,31 @@ class DatabasePersistence
         WHERE name = $1;
     SQL
 
-    result = query(sql, [name])
+    result = query(sql, name)
+    result.select do |tuple|
+      name == tuple["name"]
+    end.first
   end
 
   def update_user_name(new_name, user_id)
     sql = "UPDATE users SET name = $1 WHERE id = $2"
 
-    query(sql, [new_name, user_id])
+    query(sql, new_name, user_id)
   end
 
   def update_user_password(new_password, user_id)
     sql = "UPDATE users SET password = $1 WHERE id = $2"
 
-    query(sql, [new_password, user_id])
+    query(sql, new_password, user_id)
   end
 
   # WATCHLIST RELATED METHODS
+
+  def all_watchlist_ids(user_id)
+    sql = "SELECT id FROM watchlists WHERE user_id = $1;"
+    result = query(sql, [user_id])
+    result.field_values("id")
+  end
 
   def all_watchlists(user_id) #used when displaying all watchlists - don't need info about specific media
     sql = <<~SQL
@@ -56,9 +62,9 @@ class DatabasePersistence
              ORDER BY w.id;
     SQL
 
-    result = query(sql, [user_id])
+    result = query(sql, user_id)
 
-    result.each do |tuple|
+    result.map do |tuple|
       { id: tuple["id"].to_i,
         name: tuple["name"],
         media_count: tuple["media_count"] }
@@ -67,20 +73,20 @@ class DatabasePersistence
 
   def fetch_watchlist(watchlist_id, user_id)
     sql = <<~SQL
-          SELECT w.id AS watchlist_id, 
-                 w.name AS watchlist_name, 
-                 m.id AS media_id,
-                 m.name AS media_name,
-                 m.platform,
-                 m.url
-            FROM watchlists AS w
-      INNER JOIN media AS m
-              ON w.id = m.watchlist_id
-           WHERE w.id = $1 AND w.user_id = $2
-        ORDER BY m.id;
+              SELECT w.id AS watchlist_id, 
+                     w.name AS watchlist_name, 
+                     m.id AS media_id,
+                     m.name AS media_name,
+                     m.platform,
+                     m.url
+                FROM watchlists AS w
+     LEFT OUTER JOIN media AS m
+                  ON w.id = m.watchlist_id
+               WHERE w.id = $1 AND w.user_id = $2
+            ORDER BY m.id;
     SQL
 
-    result = query(sql, [watchlist_id, user_id])
+    result = query(sql, watchlist_id, user_id)
 
     tuple_to_watchlist(result)
   end
@@ -88,7 +94,7 @@ class DatabasePersistence
   def create_watchlist(name, user_id)
     sql = "INSERT INTO watchlists (name, user_id) VALUES ($1, $2);"
 
-    query(sql, [name, user_id])
+    query(sql, name, user_id)
   end
 
   def rename_watchlist(new_name, watchlist_id, user_id)
@@ -98,7 +104,7 @@ class DatabasePersistence
        WHERE id = $2 AND user_id = $3;
     SQL
 
-    query(sql, [new_name, watchlist_id, user_id])
+    query(sql, new_name, watchlist_id, user_id)
   end
 
   def delete_watchlist(watchlist_id, user_id)
@@ -107,7 +113,7 @@ class DatabasePersistence
       WHERE id = $1 AND user_id = $2;
     SQL
 
-    query(sql, [watchlist_id, user_id])
+    query(sql, watchlist_id, user_id)
   end
 
   def delete_all_watchlists(user_id)
@@ -116,10 +122,16 @@ class DatabasePersistence
       WHERE user_id = $1;
     SQL
 
-    query(sql, [user_id])
+    query(sql, user_id)
   end
   
   # MEDIA RELATED METHODS
+
+  def all_media_ids(watchlist_id, user_id)
+    sql = "SELECT id FROM media WHERE watchlist_id = $1 AND user_id = $2;"
+    result = query(sql, [watchlist_id, user_id])
+    result.field_values("id")
+  end
 
   def fetch_media(media_id, watchlist_id) #could this be better?
     sql = "SELECT * FROM media WHERE id = $1 AND watchlist_id = $2;"
@@ -132,10 +144,10 @@ class DatabasePersistence
   def create_media(name, platform, url, watchlist_id)
     sql = "INSERT INTO media (name, platform, url, watchlist_id) VALUES ($1, $2, $3, $4);"
 
-    query(sql, [name, platform, url, watchlist_id])
+    query(sql, name, platform, url, watchlist_id)
   end
 
-  def update_media(new_name, new_platform, new_url, media_id, watchlist_id)
+  def edit_media(new_name, new_platform, new_url, media_id, watchlist_id)
     sql = <<~SQL
       UPDATE media
          SET name = $1,
@@ -144,19 +156,19 @@ class DatabasePersistence
        WHERE id = $4 AND watchlist_id = $5;
     SQL
 
-    query(sql, [new_name, new_platform, new_url, media_id, watchlist_id])
+    query(sql, new_name, new_platform, new_url, media_id, watchlist_id)
   end
 
   def delete_media(media_id, watchlist_id)
     sql = "DELETE FROM media WHERE id = $1 AND watchlist_id = $2"
 
-    query(sql, [media_id, watchlist_id])
+    query(sql, media_id, watchlist_id)
   end
 
   def delete_all_media(watchlist_id)
     sql = "DELETE FROM media WHERE watchlist_id = $1"
 
-    query(sql, [watchlist_id])
+    query(sql, watchlist_id)
   end
 
   private

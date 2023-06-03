@@ -9,7 +9,7 @@ gem "webrick"
 gem "bcrypt"
 
 gem "pg"
-
+gem "pry"
 
 gem "rack-test"
 gem "minitest"

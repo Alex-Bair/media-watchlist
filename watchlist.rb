@@ -13,6 +13,16 @@ class Watchlist
     self
   end
 
+  def size
+    @media_list.size
+  end
+
+  def fetch_media(media_id)
+    @media_list.select do |media|
+      media.id == media_id
+    end.first
+  end
+
   def to_s
     name
   end

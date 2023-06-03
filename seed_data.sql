@@ -1,6 +1,6 @@
 INSERT INTO users (name, password)
 VALUES 
-('admin', 'secret');
+('admin', '$2a$12$i0v.IElC.H.8sKuIzEd00OhdXxAHwHCs8jVtCC8aC4A1qIEdvgIQW'); -- password is 'secret'
 
 INSERT INTO watchlists (name, user_id)
 VALUES
@@ -21,7 +21,7 @@ VALUES
 ('3 Fitness Tips that are NOT So Helpful - PictureFit', 'YouTube', 'https://www.youtube.com/watch?v=l93XQBRlOL4&ab_channel=PictureFit', 1),
 ('Protein Bar Review - LBP', 'Youtube', 'https://www.youtube.com/watch?v=tluGFwwAgfs&ab_channel=LeanBeefPatty', 1),
 ('Progressive Overload - PictureFit', 'Youtube', 'https://www.youtube.com/watch?v=HiJ1uLuTNxo&ab_channel=PictureFit', 1),
-('FFXIV OST - Athena, The Tireless One', 'YouTube', 'https://www.youtube.com/watch?v=pKt0Gpx6NFo&list=PLIZIL4zOtFv6rB04B0VhXzmXydWOvqpuz&index=3&ab_channel=dudewhereismyspoon', 2),
+('FFXIV OST - Athena, The Tireless One', 'YouTube', 'https://www.youtube.com/watch?v=pKt0Gpx6NFo&ab_channel=dudewhereismyspoon', 2),
 ('Pokemon TCG OST', 'YouTube', 'https://www.youtube.com/watch?v=YP4uFEmNQTw&ab_channel=RareOSTs', 2),
 ('Sada/Turo Battle - Retro Remix', 'YouTube', 'https://www.youtube.com/watch?v=U92u5E2xZWs&ab_channel=MissCardiac', 2),
 ('Famitracker G/S/C Rival Battle', 'YouTube', 'https://www.youtube.com/watch?v=mdruJyio-fw&ab_channel=AtomicJosuke', 2),

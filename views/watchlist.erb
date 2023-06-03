@@ -1,0 +1,37 @@
+<h1><%= @watchlist.name %></h1>
+
+<ul>
+  <% @watchlist.each do |m| %>
+    <li>
+      <% unless m.url.empty? %>
+        <a class="media-name" target="_blank" href="<%= m.url %>"><%= m.name %></a>
+      <% else %>
+        <p class="media-name"><%= m.name %></p>
+      <% end %>
+      <p><%= m.platform %></p>
+      <a href="/watchlist/<%= @watchlist.id %>/media/<%= m.id %>/edit">Edit</a>
+      <form action="/watchlist/<%= @watchlist.id %>/media/<%= m.id %>/delete" method="post">
+        <button>Delete</button>
+      </form>
+    </li>
+  <% end %>
+</ul>
+
+<form action="/watchlist/<%= @watchlist.id %>/media/new" method="post">
+  <fieldset>
+    <p>Add a media: </p>
+    <div>
+      <label for="name">Name: </label>
+      <input id="name" name="name" type="text" value="<%= params[:name] %>" required>
+    </div>
+    <div>
+      <label for="platform">Platform: </label>
+      <input id="platform" name="platform" type="text" value="<%= params[:platform] %>" required>
+    </div>
+    <div>
+      <label for="url">URL: </label>
+      <input id="url" name="url" type="url" value="<%= params[:url] %>">
+    </div>
+    <button>Create media</button>
+  </fieldset>
+</form>
