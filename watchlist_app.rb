@@ -12,7 +12,7 @@ configure do
   enable :sessions
   # may need to set the session secret
   set :erb, :escape_html => true
-  
+
   # does starting postgresql and setting up the database go in here?
 end
 
@@ -113,23 +113,34 @@ end
 
 # Add media to a watchlist
 
-post "/watchlist/:watchlist_id/media/new" do
+post "/watchlist/:watchlist_id/new_media" do
   @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
-  
-  m_name = format_input(params[:name])
-  m_platform = format_input(params[:platform])
-  m_url = format_input(params[:url])
 
-  if valid_media?(m_name, m_platform, m_url)
-    @storage.create_media(m_name, m_platform, m_url, @watchlist.id)
-    session[:message] = "#{m_name} was added to #{@watchlist}"
+  @m_name = format_input(params[:name])
+  @m_platform = format_input(params[:platform])
+  @m_url = format_input(params[:url])
+  session[:message] = ""
+
+  if !valid_name?(@m_name)
+    @m_name = nil
+    session[:message] << INVALID_NAME_MESSAGE
+  end
+
+  if !valid_platform?(@m_platform)
+    @m_platform = nil
+    session[:message] << INVALID_PLATFORM_MESSAGE
+  end
+
+  if !valid_url?(@m_url)
+    @m_url = nil
+    session[:message] << INVALID_URL_MESSAGE
+  end
+
+  if session[:message].empty? #Checks to make sure no error messages were added to the session.
+    @storage.create_media(@m_name, @m_platform, @m_url, @watchlist.id)
+    session[:message] = "#{@m_name} was added to #{@watchlist}."
     redirect "/watchlist/#{@watchlist.id}"
   else
-    session[:message] = case
-                        when !valid_name?(m_name) then INVALID_NAME_MESSAGE
-                        when !valid_platform?(m_platform) then INVALID_PLATFORM_MESSAGE
-                        when !valid_url?(m_url) then INVALID_URL_MESSAGE
-                        end
     erb :watchlist
   end
 end
@@ -140,6 +151,8 @@ get "/watchlist/:watchlist_id/media/:media_id/edit" do
   @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
   @media = @watchlist.fetch_media(params[:media_id].to_i)
 
+  @m_name, @m_platform, @m_url = @media.name, @media.platform, @media.url
+
   erb :edit_media
 end
 
@@ -149,20 +162,31 @@ post "/watchlist/:watchlist_id/media/:media_id/edit" do
   @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
   @media = @watchlist.fetch_media(params[:media_id].to_i)
 
-  m_name = format_input(params[:name])
-  m_platform = format_input(params[:platform])
-  m_url = format_input(params[:url])
+  @m_name = format_input(params[:name])
+  @m_platform = format_input(params[:platform])
+  @m_url = format_input(params[:url])
+  session[:message] = ""
 
-  if valid_media?(m_name, m_platform, m_url)
-    @storage.edit_media(m_name, m_platform, m_url, @media.id, @watchlist.id)
+  if !valid_name?(@m_name)
+    @m_name = @media.name
+    session[:message] << INVALID_NAME_MESSAGE
+  end
+
+  if !valid_platform?(@m_platform)
+    @m_platform = @media.platform
+    session[:message] << INVALID_PLATFORM_MESSAGE
+  end
+
+  if !valid_url?(@m_url)
+    @m_url = @media.url
+    session[:message] << INVALID_URL_MESSAGE
+  end
+
+  if session[:message].empty? 
+    @storage.edit_media(@m_name, @m_platform, @m_url, @media.id, @watchlist.id)
     session[:message] = "Update was successful."
     redirect "/watchlist/#{@watchlist.id}"
   else
-    session[:message] = case
-                        when !valid_name?(m_name) then INVALID_NAME_MESSAGE
-                        when !valid_platform?(m_platform) then INVALID_PLATFORM_MESSAGE
-                        when !valid_url?(m_url) then INVALID_URL_MESSAGE
-                        end
     erb :edit_media
   end
 end

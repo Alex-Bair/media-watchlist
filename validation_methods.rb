@@ -3,9 +3,9 @@ URL_REGEX = /https?:\/\/(www\.)?[a-z0-9]{1,}\.[a-z]{3}(\/[a-z0-9\-\_\%]*)*\?*([a
 NAME_CHAR_LIMIT = 60
 PLATFORM_CHAR_LIMIT = 20
 
-INVALID_NAME_MESSAGE = "Name must be between 1 and #{NAME_CHAR_LIMIT} characters."
-INVALID_PLATFORM_MESSAGE = "Platform must be between 1 and #{PLATFORM_CHAR_LIMIT} characters."
-INVALID_URL_MESSAGE = "Invalid URL."
+INVALID_NAME_MESSAGE = "Name must be between 1 and #{NAME_CHAR_LIMIT} characters. "
+INVALID_PLATFORM_MESSAGE = "Platform must be between 1 and #{PLATFORM_CHAR_LIMIT} characters. "
+INVALID_URL_MESSAGE = "Invalid URL. "
 
 
 def format_input(string)

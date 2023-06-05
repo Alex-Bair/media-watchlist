@@ -17,20 +17,20 @@
   <% end %>
 </ul>
 
-<form action="/watchlist/<%= @watchlist.id %>/media/new" method="post">
+<form action="/watchlist/<%= @watchlist.id %>/new_media" method="post">
   <fieldset>
     <p>Add a media: </p>
     <div>
       <label for="name">Name: </label>
-      <input id="name" name="name" type="text" value="<%= params[:name] %>" required>
+      <input id="name" name="name" type="text" value="<%= @m_name %>" required>
     </div>
     <div>
       <label for="platform">Platform: </label>
-      <input id="platform" name="platform" type="text" value="<%= params[:platform] %>" required>
+      <input id="platform" name="platform" type="text" value="<%= @m_platform %>" required>
     </div>
     <div>
       <label for="url">URL: </label>
-      <input id="url" name="url" type="url" value="<%= params[:url] %>">
+      <input id="url" name="url" type="url" value="<%= @m_url %>">
     </div>
     <button>Create media</button>
   </fieldset>
