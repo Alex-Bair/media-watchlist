@@ -9,7 +9,7 @@ def valid_credentials?(username, password, user)
 end
 
 def signed_in?
-  !session[:signed_in_account].nil?
+  !session[:user_id].nil?
 end
 
 def authenticate

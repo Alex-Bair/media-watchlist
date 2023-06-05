@@ -47,7 +47,7 @@ class DatabasePersistence
 
   def all_watchlist_ids(user_id)
     sql = "SELECT id FROM watchlists WHERE user_id = $1;"
-    result = query(sql, [user_id])
+    result = query(sql, user_id)
     result.field_values("id")
   end
 
@@ -127,9 +127,9 @@ class DatabasePersistence
   
   # MEDIA RELATED METHODS
 
-  def all_media_ids(watchlist_id, user_id)
-    sql = "SELECT id FROM media WHERE watchlist_id = $1 AND user_id = $2;"
-    result = query(sql, [watchlist_id, user_id])
+  def all_media_ids(watchlist_id)
+    sql = "SELECT id FROM media WHERE watchlist_id = $1;"
+    result = query(sql, watchlist_id)
     result.field_values("id")
   end
 
