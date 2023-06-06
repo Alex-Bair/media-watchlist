@@ -45,10 +45,46 @@ class DatabasePersistence
 
   # WATCHLIST RELATED METHODS
 
+  def max_watchlist_page_number(items_per_page, user_id)
+    sql = <<~SQL
+    SELECT CEIL(COUNT(id) * 1.0 / $1) AS max_page
+    FROM watchlists
+    WHERE user_id = $2;
+    SQL
+
+    result = query(sql, items_per_page, user_id).field_values("max_page").first
+    
+    result = "1" if result == "0"
+    
+    result
+  end
+
   def all_watchlist_ids(user_id)
     sql = "SELECT id FROM watchlists WHERE user_id = $1;"
     result = query(sql, user_id)
     result.field_values("id")
+  end
+
+  def fetch_page_of_watchlists(user_id, limit, offset)
+    sql = <<~SQL
+                  SELECT w.id, w.name, w.user_id, COUNT(m.id) AS media_count
+                 FROM watchlists AS w
+      LEFT OUTER JOIN media AS m
+                   ON m.watchlist_id = w.id
+                WHERE w.user_id = $1
+             GROUP BY w.id
+             ORDER BY w.id
+	              LIMIT $2
+               OFFSET $3;
+    SQL
+
+    result = query(sql, user_id, limit, offset)
+
+    result.map do |tuple|     # factor this into a method?
+      { id: tuple["id"].to_i,
+        name: tuple["name"],
+        media_count: tuple["media_count"] }
+    end
   end
 
   def all_watchlists(user_id) #used when displaying all watchlists - don't need info about specific media
@@ -64,14 +100,36 @@ class DatabasePersistence
 
     result = query(sql, user_id)
 
-    result.map do |tuple|
+    result.map do |tuple|    #factor this into a method?
       { id: tuple["id"].to_i,
         name: tuple["name"],
         media_count: tuple["media_count"] }
     end
   end
 
-  def fetch_watchlist(watchlist_id, user_id)
+  def fetch_partial_watchlist(watchlist_id, user_id, limit, offset)
+    sql = <<~SQL
+              SELECT w.id AS watchlist_id, 
+                     w.name AS watchlist_name, 
+                     m.id AS media_id,
+                     m.name AS media_name,
+                     m.platform,
+                     m.url
+                FROM watchlists AS w
+     LEFT OUTER JOIN media AS m
+                  ON w.id = m.watchlist_id
+               WHERE w.id = $1 AND w.user_id = $2
+            ORDER BY m.id
+               LIMIT $3
+              OFFSET $4;
+    SQL
+
+    result = query(sql, watchlist_id, user_id, limit, offset)
+
+    tuple_to_watchlist(result)
+  end
+
+  def fetch_full_watchlist(watchlist_id, user_id)
     sql = <<~SQL
               SELECT w.id AS watchlist_id, 
                      w.name AS watchlist_name, 
@@ -127,6 +185,16 @@ class DatabasePersistence
   
   # MEDIA RELATED METHODS
 
+  def max_media_page_number(items_per_page, watchlist_id)
+    sql = <<~SQL
+    SELECT CEIL(COUNT(id) * 1.0 / $1) AS max_page
+    FROM media
+    WHERE watchlist_id = $2;
+    SQL
+
+    query(sql, items_per_page, watchlist_id).field_values("max_page").first
+  end
+
   def all_media_ids(watchlist_id)
     sql = "SELECT id FROM media WHERE watchlist_id = $1;"
     result = query(sql, watchlist_id)
@@ -180,8 +248,10 @@ class DatabasePersistence
 
   def tuple_to_watchlist(result)
 
-    media_list = result.map do |tuple|
-      tuple_to_media(tuple)
+    media_list = []
+
+    result.each do |tuple|
+      media_list << tuple_to_media(tuple) unless tuple["media_id"].nil? # have to factor out nil result if the watchlist does not contain any media yet
     end
 
     watchlist_id = result.field_values("watchlist_id").first

@@ -8,6 +8,8 @@ require_relative "database_persistence"
 require_relative "authentication_methods"
 require_relative "validation_methods"
 
+DISPLAY_LIMIT = 5
+
 configure do
   enable :sessions
   # may need to set the session secret
@@ -18,22 +20,42 @@ end
 
 configure(:development) do
   require "sinatra/reloader"
-  also_reload "database_persistence.rb"
+end
+
+def nil_or_empty?(input)
+  input.nil? || input.empty?
 end
 
 before do
   @storage = DatabasePersistence.new(logger)
   authenticate
+  @user_id = session[:user_id]
 end
 
 # Validate watchlist_id and media_id URL parameters.
 
 before  "/watchlist/:watchlist_id*" do
-  validate_watchlist_id(params[:watchlist_id], session[:user_id])
+  validate_watchlist_id(params[:watchlist_id], @user_id)
 end
 
 before "/watchlist/:watchlist_id/media/:media_id*" do
   validate_media_id(params[:media_id], params[:watchlist_id])
+end
+
+# Initialize and validate page numbers
+
+before "/" do
+  @max_page = @storage.max_watchlist_page_number(DISPLAY_LIMIT, @user_id).to_i
+  validate_watchlist_page_number(params[:page], @max_page)
+  @page = nil_or_empty?(params[:page]) ? 1 : params[:page].to_i
+  @offset = (@page - 1) * DISPLAY_LIMIT
+end
+
+before "/watchlist/:watchlist_id" do
+  @max_page = @storage.max_media_page_number(DISPLAY_LIMIT, params[:watchlist_id]).to_i
+  validate_media_page_number(params[:page], @max_page)
+  @page = nil_or_empty?(params[:page]) ? 1 : params[:page].to_i
+  @offset = (@page - 1) * DISPLAY_LIMIT
 end
 
 # ROUTE HANDLING
@@ -43,22 +65,22 @@ end
 # Display homepage with list of watchlists
 
 get "/" do
-  @watchlists = @storage.all_watchlists(session[:user_id])
+  @watchlists = @storage.fetch_page_of_watchlists(@user_id, DISPLAY_LIMIT, @offset)
 
   erb :home
 end
 
 # Create a new watchlist
 
-post "/new_watchlist" do
+post "/" do
   name = format_input(params[:name])
 
-  if valid_name?(name)
-    @storage.create_watchlist(name, session[:user_id])
+  if valid_name?(name) # need to ensure name is unique
+    @storage.create_watchlist(name, @user_id)
     session[:message] = "#{name} was created."
-    redirect "/"
+    redirect "/?page=#{@page}"
   else
-    @watchlists = @storage.all_watchlists(session[:user_id])
+    @watchlists = @storage.fetch_page_of_watchlists(@user_id, DISPLAY_LIMIT, @offset)
     session[:message] = INVALID_NAME_MESSAGE
     erb :home
   end
@@ -67,7 +89,7 @@ end
 # View a watchlist
 
 get "/watchlist/:watchlist_id" do
-  @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
+  @watchlist = @storage.fetch_partial_watchlist(params[:watchlist_id], @user_id, DISPLAY_LIMIT, @offset)
 
   erb :watchlist
 end
@@ -75,7 +97,7 @@ end
 # View page to rename a watchlist
 
 get "/watchlist/:watchlist_id/rename" do
-  @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
+  @watchlist = @storage.fetch_full_watchlist(params[:watchlist_id], @user_id)
 
   erb :rename_watchlist
 end
@@ -83,12 +105,12 @@ end
 # Rename a watchlist
 
 post "/watchlist/:watchlist_id/rename" do
-  @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
+  @watchlist = @storage.fetch_full_watchlist(params[:watchlist_id], @user_id)
   old_name = @watchlist.name
   new_name = format_input(params[:new_name])
 
   if valid_name?(new_name)
-    @storage.rename_watchlist(new_name, params[:watchlist_id], session[:user_id])
+    @storage.rename_watchlist(new_name, params[:watchlist_id], @user_id)
     session[:message] = "#{old_name} was renamed to #{new_name}."
     redirect "/"
   else
@@ -100,10 +122,10 @@ end
 # Delete a watchlist
 
 post "/watchlist/:watchlist_id/delete" do
-  @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
+  @watchlist = @storage.fetch_full_watchlist(params[:watchlist_id], @user_id)
   name = @watchlist.name
 
-  @storage.delete_watchlist(@watchlist.id, session[:user_id])
+  @storage.delete_watchlist(@watchlist.id, @user_id)
 
   session[:message] = "#{name} was deleted."
   redirect "/"
@@ -113,8 +135,8 @@ end
 
 # Add media to a watchlist
 
-post "/watchlist/:watchlist_id/new_media" do
-  @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
+post "/watchlist/:watchlist_id" do
+  @watchlist = @storage.fetch_partial_watchlist(params[:watchlist_id], @user_id, DISPLAY_LIMIT, @offset)
 
   @m_name = format_input(params[:name])
   @m_platform = format_input(params[:platform])
@@ -139,7 +161,7 @@ post "/watchlist/:watchlist_id/new_media" do
   if session[:message].empty? #Checks to make sure no error messages were added to the session.
     @storage.create_media(@m_name, @m_platform, @m_url, @watchlist.id)
     session[:message] = "#{@m_name} was added to #{@watchlist}."
-    redirect "/watchlist/#{@watchlist.id}"
+    redirect "/watchlist/#{@watchlist.id}?page=#{@page}"
   else
     erb :watchlist
   end
@@ -148,7 +170,7 @@ end
 # Visit page to edit a media
 
 get "/watchlist/:watchlist_id/media/:media_id/edit" do
-  @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
+  @watchlist = @storage.fetch_full_watchlist(params[:watchlist_id], @user_id)
   @media = @watchlist.fetch_media(params[:media_id].to_i)
 
   @m_name, @m_platform, @m_url = @media.name, @media.platform, @media.url
@@ -159,7 +181,7 @@ end
 # Edit a media
 
 post "/watchlist/:watchlist_id/media/:media_id/edit" do
-  @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
+  @watchlist = @storage.fetch_full_watchlist(params[:watchlist_id], @user_id)
   @media = @watchlist.fetch_media(params[:media_id].to_i)
 
   @m_name = format_input(params[:name])
@@ -194,7 +216,7 @@ end
 # Delete a media
 
 post "/watchlist/:watchlist_id/media/:media_id/delete" do
-  @watchlist = @storage.fetch_watchlist(params[:watchlist_id], session[:user_id])
+  @watchlist = @storage.fetch_full_watchlist(params[:watchlist_id], @user_id)
   media = @watchlist.fetch_media(params[:media_id].to_i)
   name = media.name
 
@@ -209,10 +231,6 @@ end
 # Display registration page
 
 # Create a new user
-
-# Display edit user page
-
-# Edit user
 
 # Display sign in page
 

@@ -17,7 +17,15 @@
   <% end %>
 </ul>
 
-<form action="/watchlist/<%= @watchlist.id %>/new_media" method="post">
+<% if @page > 1%>
+  <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page - 1%>">Previous Page</a>
+<% end %>
+
+<% if @page < @max_page %>
+  <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page + 1%>">Next Page</a>
+<% end %>
+
+<form action="/watchlist/<%= @watchlist.id %>" method="post">
   <fieldset>
     <p>Add a media: </p>
     <div>
@@ -31,6 +39,9 @@
     <div>
       <label for="url">URL: </label>
       <input id="url" name="url" type="url" value="<%= @m_url %>">
+    </div>
+    <div>
+      <input type="hidden" name="page" value="<%= params[:page] %>">
     </div>
     <button>Create media</button>
   </fieldset>
