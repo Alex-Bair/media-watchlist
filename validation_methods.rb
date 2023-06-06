@@ -4,7 +4,8 @@ NUMBER_REGEX = /^\d+$/
 NAME_CHAR_LIMIT = 60
 PLATFORM_CHAR_LIMIT = 20
 
-INVALID_NAME_MESSAGE = "Name must be between 1 and #{NAME_CHAR_LIMIT} characters. "
+INVALID_WATCHLIST_NAME_MESSAGE = "Name must be unique and between 1 and #{NAME_CHAR_LIMIT} characters. "
+INVALID_MEDIA_NAME_MESSAGE = "Name must be between 1 and #{NAME_CHAR_LIMIT} characters. "
 INVALID_PLATFORM_MESSAGE = "Platform must be between 1 and #{PLATFORM_CHAR_LIMIT} characters. "
 INVALID_URL_MESSAGE = "Invalid URL. "
 
@@ -28,7 +29,14 @@ def shorter_than?(string, length)
   string.strip.size <= length
 end
 
-def valid_name?(string)
+def valid_watchlist_name?(string)
+
+  existing_names = @storage.all_watchlists(@user_id).map {|hsh| hsh[:name]}
+
+  !all_whitespace?(string) && shorter_than?(string, NAME_CHAR_LIMIT) && !existing_names.include?(string)
+end
+
+def valid_media_name?(string)
   !all_whitespace?(string) && shorter_than?(string, NAME_CHAR_LIMIT)
 end
 

@@ -75,13 +75,13 @@ end
 post "/" do
   name = format_input(params[:name])
 
-  if valid_name?(name) # need to ensure name is unique
+  if valid_watchlist_name?(name) # need to ensure name is unique
     @storage.create_watchlist(name, @user_id)
     session[:message] = "#{name} was created."
     redirect "/?page=#{@page}"
   else
     @watchlists = @storage.fetch_page_of_watchlists(@user_id, DISPLAY_LIMIT, @offset)
-    session[:message] = INVALID_NAME_MESSAGE
+    session[:message] = INVALID_WATCHLIST_NAME_MESSAGE
     erb :home
   end
 end
@@ -109,12 +109,12 @@ post "/watchlist/:watchlist_id/rename" do
   old_name = @watchlist.name
   new_name = format_input(params[:new_name])
 
-  if valid_name?(new_name)
+  if valid_watchlist_name?(new_name) || new_name == old_name
     @storage.rename_watchlist(new_name, params[:watchlist_id], @user_id)
-    session[:message] = "#{old_name} was renamed to #{new_name}."
+    session[:message] = "#{old_name} was renamed to #{new_name}." unless new_name == old_name
     redirect "/"
   else
-    session[:message] = INVALID_NAME_MESSAGE
+    session[:message] = INVALID_WATCHLIST_NAME_MESSAGE
     erb :rename_watchlist
   end
 end
@@ -143,9 +143,9 @@ post "/watchlist/:watchlist_id" do
   @m_url = format_input(params[:url])
   session[:message] = ""
 
-  if !valid_name?(@m_name)
+  if !valid_media_name?(@m_name)
     @m_name = nil
-    session[:message] << INVALID_NAME_MESSAGE
+    session[:message] << INVALID_MEDIA_NAME_MESSAGE
   end
 
   if !valid_platform?(@m_platform)
@@ -189,9 +189,9 @@ post "/watchlist/:watchlist_id/media/:media_id/edit" do
   @m_url = format_input(params[:url])
   session[:message] = ""
 
-  if !valid_name?(@m_name)
+  if !valid_media_name?(@m_name)
     @m_name = @media.name
-    session[:message] << INVALID_NAME_MESSAGE
+    session[:message] << INVALID_MEDIA_NAME_MESSAGE
   end
 
   if !valid_platform?(@m_platform)
