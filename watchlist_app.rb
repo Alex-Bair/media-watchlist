@@ -15,7 +15,7 @@ configure do
   # may need to set the session secret
   set :erb, :escape_html => true
 
-  # does starting postgresql and setting up the database go in here?
+  load (File.expand_path("..", __FILE__) + "/create_database.rb")
 end
 
 configure(:development) do
@@ -75,7 +75,7 @@ end
 post "/" do
   name = format_input(params[:name])
 
-  if valid_watchlist_name?(name) # need to ensure name is unique
+  if valid_watchlist_name?(name)
     @storage.create_watchlist(name, @user_id)
     session[:message] = "#{name} was created."
     redirect "/?page=#{@page}"
@@ -230,7 +230,23 @@ end
 
 # Display registration page
 
+get "/users/register" do
+  erb :register
+end
+
 # Create a new user
+
+post "/users/register" do
+  username = format_input(params[:username])
+  password = params[:password]
+
+  if valid_username?(username)
+    @storage.create_user(username, encrypt_password(password))
+    redirect "/users/sign_in"
+  else
+    erb :register
+  end
+end
 
 # Display sign in page
 

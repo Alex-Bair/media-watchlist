@@ -31,18 +31,6 @@ class DatabasePersistence
     end.first
   end
 
-  def update_user_name(new_name, user_id)
-    sql = "UPDATE users SET name = $1 WHERE id = $2"
-
-    query(sql, new_name, user_id)
-  end
-
-  def update_user_password(new_password, user_id)
-    sql = "UPDATE users SET password = $1 WHERE id = $2"
-
-    query(sql, new_password, user_id)
-  end
-
   # WATCHLIST RELATED METHODS
 
   def max_watchlist_page_number(items_per_page, user_id)

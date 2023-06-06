@@ -97,3 +97,20 @@ def validate_media_page_number(page_number, max)
     redirect "/watchlist/#{params[:watchlist_id]}"
   end
 end
+
+def username_exists?(name)
+  !@storage.fetch_user(name).nil?
+end
+
+def valid_username?(name)
+  if username_exists?(name)
+    session[:message] = "A profile already exists for user #{username}."
+  elsif !shorter_than?(name, NAME_CHAR_LIMIT)
+    session[:message] = "Username must be shorter than #{NAME_CHAR_LIMIT} "
+  else
+    session[:message] = "Profile creation successful."
+    return true
+  end
+
+  false
+end

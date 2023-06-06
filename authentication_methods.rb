@@ -1,11 +1,9 @@
 require 'bcrypt'
 
 def valid_credentials?(username, password, user)
-  encrypted_password = user["password"]
-
   !username.empty? &&
-    user["name"] == username &&
-    BCrypt::Password.new(encrypted_password) == password
+    !user.nil? &&
+    BCrypt::Password.new(user["password"]) == password
 end
 
 def signed_in?
@@ -13,8 +11,14 @@ def signed_in?
 end
 
 def authenticate
-  unless signed_in? || request.path_info == "/users/sign_in"
+  unless ( signed_in? || 
+      request.path_info == "/users/sign_in" || 
+      request.path_info == "/users/register" )
     session[:next_destination] = request.path_info
     redirect "/users/sign_in"
   end
+end
+
+def encrypt_password(password)
+  BCrypt::Password.create(password)
 end
