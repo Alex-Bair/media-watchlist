@@ -1,5 +1,6 @@
 require "sinatra"
 require "tilt/erubis"
+require 'securerandom'
 require "pry"
 
 require_relative "lib/media"
@@ -14,7 +15,7 @@ ROOT = File.expand_path("..", __FILE__)
 
 configure do
   enable :sessions
-  # may need to set the session secret
+  set :session_secret, ENV['SESSION_SECRET'] { SecureRandom.hex(64) }
   set :erb, :escape_html => true
 
   load (ROOT + "/lib/create_database.rb")
