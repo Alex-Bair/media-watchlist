@@ -10,20 +10,18 @@ require_relative "lib/validation_methods"
 
 DISPLAY_LIMIT = 5
 
+ROOT = File.expand_path("..", __FILE__)
+
 configure do
   enable :sessions
   # may need to set the session secret
   set :erb, :escape_html => true
 
-  load (File.expand_path("..", __FILE__) + "/lib/create_database.rb")
+  load (ROOT + "/lib/create_database.rb")
 end
 
 configure(:development) do
   require "sinatra/reloader"
-end
-
-def nil_or_empty?(input)
-  input.nil? || input.empty?
 end
 
 before do
@@ -77,11 +75,12 @@ post "/" do
 
   if valid_watchlist_name?(name)
     @storage.create_watchlist(name, @user_id)
-    session[:message] = "#{name} was created."
+    session[:success] = "#{name} was created."
     redirect "/?page=#{@page}"
   else
     @watchlists = @storage.fetch_page_of_watchlists(@user_id, DISPLAY_LIMIT, @offset)
-    session[:message] = INVALID_WATCHLIST_NAME_MESSAGE
+    session[:error] = INVALID_WATCHLIST_NAME_MESSAGE
+    status 422
     erb :home
   end
 end
@@ -111,10 +110,11 @@ post "/watchlist/:watchlist_id/rename" do
 
   if valid_watchlist_name?(new_name) || new_name == old_name
     @storage.rename_watchlist(new_name, params[:watchlist_id], @user_id)
-    session[:message] = "#{old_name} was renamed to #{new_name}." unless new_name == old_name
+    session[:success] = "#{old_name} was renamed to #{new_name}." unless new_name == old_name
     redirect "/"
   else
-    session[:message] = INVALID_WATCHLIST_NAME_MESSAGE
+    session[:error] = INVALID_WATCHLIST_NAME_MESSAGE
+    status 422
     erb :rename_watchlist
   end
 end
@@ -127,7 +127,7 @@ post "/watchlist/:watchlist_id/delete" do
 
   @storage.delete_watchlist(@watchlist.id, @user_id)
 
-  session[:message] = "#{name} was deleted."
+  session[:success] = "#{name} was deleted."
   redirect "/"
 end
 
@@ -141,28 +141,29 @@ post "/watchlist/:watchlist_id" do
   @m_name = format_input(params[:name])
   @m_platform = format_input(params[:platform])
   @m_url = format_input(params[:url])
-  session[:message] = ""
+  session[:error] = ""
 
   if !valid_media_name?(@m_name)
     @m_name = nil
-    session[:message] << INVALID_MEDIA_NAME_MESSAGE
+    session[:error] << INVALID_MEDIA_NAME_MESSAGE
   end
 
   if !valid_platform?(@m_platform)
     @m_platform = nil
-    session[:message] << INVALID_PLATFORM_MESSAGE
+    session[:error] << INVALID_PLATFORM_MESSAGE
   end
 
   if !valid_url?(@m_url)
     @m_url = nil
-    session[:message] << INVALID_URL_MESSAGE
+    session[:error] << INVALID_URL_MESSAGE
   end
 
-  if session[:message].empty? #Checks to make sure no error messages were added to the session.
+  if session[:error].empty? #Checks to make sure no error messages were added to the session.
     @storage.create_media(@m_name, @m_platform, @m_url, @watchlist.id)
-    session[:message] = "#{@m_name} was added to #{@watchlist}."
+    session[:success] = "#{@m_name} was added to #{@watchlist}."
     redirect "/watchlist/#{@watchlist.id}?page=#{@page}"
   else
+    status 422
     erb :watchlist
   end
 end
@@ -187,28 +188,29 @@ post "/watchlist/:watchlist_id/media/:media_id/edit" do
   @m_name = format_input(params[:name])
   @m_platform = format_input(params[:platform])
   @m_url = format_input(params[:url])
-  session[:message] = ""
+  session[:error] = ""
 
   if !valid_media_name?(@m_name)
     @m_name = @media.name
-    session[:message] << INVALID_MEDIA_NAME_MESSAGE
+    session[:error] << INVALID_MEDIA_NAME_MESSAGE
   end
 
   if !valid_platform?(@m_platform)
     @m_platform = @media.platform
-    session[:message] << INVALID_PLATFORM_MESSAGE
+    session[:error] << INVALID_PLATFORM_MESSAGE
   end
 
   if !valid_url?(@m_url)
     @m_url = @media.url
-    session[:message] << INVALID_URL_MESSAGE
+    session[:error] << INVALID_URL_MESSAGE
   end
 
-  if session[:message].empty? 
+  if session[:error].empty? 
     @storage.edit_media(@m_name, @m_platform, @m_url, @media.id, @watchlist.id)
-    session[:message] = "Update was successful."
+    session[:success] = "Update was successful."
     redirect "/watchlist/#{@watchlist.id}"
   else
+    status 422
     erb :edit_media
   end
 end
@@ -221,7 +223,7 @@ post "/watchlist/:watchlist_id/media/:media_id/delete" do
   name = media.name
 
   @storage.delete_media(media.id, @watchlist.id)
-  session[:message] = "#{name} was deleted."
+  session[:success] = "#{name} was deleted."
   
   redirect "/watchlist/#{@watchlist.id}"
 end
@@ -244,6 +246,7 @@ post "/users/register" do
     @storage.create_user(username, encrypt_password(password))
     redirect "/users/sign_in"
   else
+    status 422
     erb :register
   end
 end
@@ -263,12 +266,12 @@ post "/users/sign_in" do
   user = @storage.fetch_user(username)
 
   if valid_credentials?(username, password, user)
-    session[:message] = "Welcome #{user["name"]}!"
+    session[:success] = "Welcome #{user["name"]}!"
     session[:user_id] = user["id"].to_i
     redirect (session.delete(:next_destination) || "/")
   else
-    session[:message] = "Invalid credentials."
-    status 422 # Should this be 401 instead?
+    session[:error] = "Invalid credentials."
+    status 422
     erb :sign_in
   end
 end
@@ -277,6 +280,6 @@ end
 
 get "/users/sign_out" do
   sign_out
-  
+
   redirect "/users/sign_in"
 end

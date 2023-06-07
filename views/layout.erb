@@ -16,8 +16,12 @@
     </h1>
   </header>
   <main>
-    <% if session[:message] %>
-      <p class="message"><%= session.delete(:message) %></p>
+    <% if session[:error] %>
+      <p class="flash error"><%= session.delete(:error) %></p>
+    <% end %>
+
+    <% if session[:success] %>
+      <p class="flash success"><%= session.delete(:success) %></p>
     <% end %>
 
     <% if session[:user_id] %>

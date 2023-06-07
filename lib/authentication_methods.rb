@@ -11,9 +11,12 @@ def signed_in?
 end
 
 def authenticate
+  path = request.path_info
+
   unless ( signed_in? || 
-      request.path_info == "/users/sign_in" || 
-      request.path_info == "/users/register" )
+      path == "/users/sign_in" || 
+      path == "/users/register" )
+
     session[:next_destination] = request.path_info
     redirect "/users/sign_in"
   end
@@ -25,5 +28,5 @@ end
 
 def sign_out
   session.delete(:user_id)
-  session[:message] = "You have been signed out."
+  session[:success] = "You have been signed out."
 end

@@ -17,6 +17,10 @@ def invalid_page_number_error(max, items)
   end
 end
 
+def nil_or_empty?(input)
+  input.nil? || input.empty?
+end
+
 def format_input(string)
   string.strip
 end
@@ -62,20 +66,20 @@ end
 
 def validate_watchlist_id(watchlist_id, user_id)
   unless valid_watchlist_id?(watchlist_id, user_id) || watchlist_id.nil?
-    session[:message] = "That watchlist does not exist."
+    session[:error] = "That watchlist does not exist."
     redirect "/"
   end
 end
 
 def validate_media_id(media_id, watchlist_id)
   unless valid_media_id?(media_id, watchlist_id) || media_id.nil?
-    session[:message] = "That media does not exist."
+    session[:error] = "That media does not exist."
     redirect "/watchlist/#{watchlist_id}"
   end
 end
 
 def valid_page_number?(page_number_str, max)
-  return true if page_number_str.nil?
+  return true if nil_or_empty?(page_number_str)
 
   p_num = page_number_str.to_i
 
@@ -86,14 +90,14 @@ end
 
 def validate_watchlist_page_number(page_number, max)
   unless valid_page_number?(page_number, max)
-    session[:message] = invalid_page_number_error(max, "watchlists")
+    session[:error] = invalid_page_number_error(max, "watchlists")
     redirect "/"
   end
 end
 
 def validate_media_page_number(page_number, max)
   unless valid_page_number?(page_number, max)
-    session[:message] = invalid_page_number_error(max, "media")
+    session[:error] = invalid_page_number_error(max, "media")
     redirect "/watchlist/#{params[:watchlist_id]}"
   end
 end
@@ -104,11 +108,11 @@ end
 
 def valid_username?(name)
   if username_exists?(name)
-    session[:message] = "A profile already exists for user #{username}."
+    session[:error] = "A profile already exists for user #{username}."
   elsif !shorter_than?(name, NAME_CHAR_LIMIT)
-    session[:message] = "Username must be shorter than #{NAME_CHAR_LIMIT} "
+    session[:error] = "Username must be shorter than #{NAME_CHAR_LIMIT} "
   else
-    session[:message] = "Profile creation successful."
+    session[:success] = "Profile creation successful."
     return true
   end
 
