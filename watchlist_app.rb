@@ -2,11 +2,11 @@ require "sinatra"
 require "tilt/erubis"
 require "pry"
 
-require_relative "media"
-require_relative "watchlist"
-require_relative "database_persistence"
-require_relative "authentication_methods"
-require_relative "validation_methods"
+require_relative "lib/media"
+require_relative "lib/watchlist"
+require_relative "lib/database_persistence"
+require_relative "lib/authentication_methods"
+require_relative "lib/validation_methods"
 
 DISPLAY_LIMIT = 5
 
@@ -15,7 +15,7 @@ configure do
   # may need to set the session secret
   set :erb, :escape_html => true
 
-  load (File.expand_path("..", __FILE__) + "/create_database.rb")
+  load (File.expand_path("..", __FILE__) + "/lib/create_database.rb")
 end
 
 configure(:development) do
