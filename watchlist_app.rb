@@ -272,3 +272,11 @@ post "/users/sign_in" do
     erb :sign_in
   end
 end
+
+# Sign out a user
+
+get "/users/sign_out" do
+  sign_out
+  
+  redirect "/users/sign_in"
+end

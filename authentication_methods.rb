@@ -22,3 +22,8 @@ end
 def encrypt_password(password)
   BCrypt::Password.create(password)
 end
+
+def sign_out
+  session.delete(:user_id)
+  session[:message] = "You have been signed out."
+end
