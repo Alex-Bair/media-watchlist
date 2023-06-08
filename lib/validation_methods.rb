@@ -110,7 +110,7 @@ def valid_username?(name)
   if username_exists?(name)
     session[:error] = "A profile already exists for user #{username}."
   elsif !shorter_than?(name, NAME_CHAR_LIMIT)
-    session[:error] = "Username must be shorter than #{NAME_CHAR_LIMIT} "
+    session[:error] = "Username must be shorter than #{NAME_CHAR_LIMIT} characters."
   else
     session[:success] = "Profile creation successful."
     return true

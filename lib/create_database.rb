@@ -1,4 +1,4 @@
-system 'dropdb media_watchlist'
-system 'createdb media_watchlist'
-system 'psql -d media_watchlist < db/schema.sql'
-system 'psql -d media_watchlist < db/seed_data.sql'
+schema_path = File.expand_path("../../db/schema.sql", __FILE__)
+
+system "createdb media_watchlist"
+system "psql -d media_watchlist < #{schema_path}"

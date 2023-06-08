@@ -1,5 +1,3 @@
-# ALL METHODS NEED TESTED!!!!!
-
 require 'pg'
 
 class DatabasePersistence
@@ -8,15 +6,13 @@ class DatabasePersistence
     @logger = logger
   end
 
-  # USER RELATED METHODS - may need to refine later!!!!!!
+  # USER RELATED METHODS
   
   def create_user(name, password)
     sql = "INSERT INTO users (name, password) VALUES ($1, $2);"
 
     query(sql, name, password)
   end
-
-# may need to add a method to retrieve all usernames? Or to check if a username already exists?
 
   def fetch_user(name)
     sql = <<~SQL

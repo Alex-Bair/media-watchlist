@@ -11,18 +11,33 @@ require_relative "lib/validation_methods"
 
 DISPLAY_LIMIT = 5
 
-ROOT = File.expand_path("..", __FILE__)
+def database_exists?(name)
+  postgres_db = PG.connect(dbname: "postgres")
+
+  sql = <<~SQL
+  SELECT datname 
+  FROM pg_catalog.pg_database 
+  WHERE datname = $1;
+  SQL
+  
+  result = postgres_db.exec_params(sql, [name])
+  
+  postgres_db.close
+  
+  result.ntuples == 1
+end
+
+def setup_database
+  create_database_file = File.expand_path("../lib/create_database.rb", __FILE__) 
+  load create_database_file 
+end
 
 configure do
   enable :sessions
   set :session_secret, ENV['SESSION_SECRET'] { SecureRandom.hex(64) }
   set :erb, :escape_html => true
 
-  load (ROOT + "/lib/create_database.rb")
-end
-
-configure(:development) do
-  require "sinatra/reloader"
+  setup_database unless database_exists?('media_watchlist')
 end
 
 before do
@@ -33,7 +48,7 @@ end
 
 # Validate watchlist_id and media_id URL parameters.
 
-before  "/watchlist/:watchlist_id*" do
+before "/watchlist/:watchlist_id*" do
   validate_watchlist_id(params[:watchlist_id], @user_id)
 end
 
@@ -43,18 +58,27 @@ end
 
 # Initialize and validate page numbers
 
+ROUTES_WITH_PAGES = ["/", "/watchlist/:watchlist_id"]
+
 before "/" do
   @max_page = @storage.max_watchlist_page_number(DISPLAY_LIMIT, @user_id).to_i
   validate_watchlist_page_number(params[:page], @max_page)
-  @page = nil_or_empty?(params[:page]) ? 1 : params[:page].to_i
-  @offset = (@page - 1) * DISPLAY_LIMIT
 end
 
 before "/watchlist/:watchlist_id" do
   @max_page = @storage.max_media_page_number(DISPLAY_LIMIT, params[:watchlist_id]).to_i
   validate_media_page_number(params[:page], @max_page)
-  @page = nil_or_empty?(params[:page]) ? 1 : params[:page].to_i
-  @offset = (@page - 1) * DISPLAY_LIMIT
+end
+
+ROUTES_WITH_PAGES.each do |route|
+  before route do
+    @page = nil_or_empty?(params[:page]) ? 1 : params[:page].to_i
+    @offset = (@page - 1) * DISPLAY_LIMIT
+  end
+end
+
+after do
+  session[:previous_path] = request.path_info + "?" + request.query_string
 end
 
 # ROUTE HANDLING
@@ -255,6 +279,11 @@ end
 # Display sign in page
 
 get "/users/sign_in" do
+  if @user_id
+    session[:error] = "You are already signed in."
+    redirect session[:previous_path]
+  end
+  
   erb :sign_in
 end
 
