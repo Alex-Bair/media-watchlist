@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Class encapsulates media attributes
 class Media
   attr_reader :id, :name, :platform, :url
 

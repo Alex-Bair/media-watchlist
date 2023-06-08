@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+# Class encapsulates watchlist attributes, including associated media.
+# Provides #each to easily iterate through media and #fetch_media to retrieve a specific Media object on the watchlist.
 class Watchlist
   attr_reader :id, :name, :media_list
 
@@ -7,14 +11,10 @@ class Watchlist
     @media_list = media_list
   end
 
-  def each
-    @media_list.each { |media| yield(media) }
+  def each(&block)
+    @media_list.each { |media| block.call(media) }
 
     self
-  end
-
-  def size
-    @media_list.size
   end
 
   def fetch_media(media_id)

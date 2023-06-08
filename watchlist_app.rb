@@ -15,12 +15,14 @@ DISPLAY_LIMIT = 5
 configure do
   enable :sessions
   set :session_secret, ENV['SESSION_SECRET'] { SecureRandom.hex(64) }
-  set :erb, :escape_html => true
+  set :erb, escape_html: true # does this work to avoid JS injection?
 
   setup_database unless database_exists?('media_watchlist')
 end
 
 # FILTERS
+
+# Ensure user is signed in before viewing any pages.
 
 before do
   @storage = DatabasePersistence.new(logger)
@@ -161,25 +163,9 @@ end
 post '/watchlist/:watchlist_id/new_media' do
   @watchlist = @storage.fetch_partial_watchlist(params[:watchlist_id], @user_id, DISPLAY_LIMIT, @offset)
 
-  @m_name = format_input(params[:name])
-  @m_platform = format_input(params[:platform])
-  @m_url = format_input(params[:url])
-  session[:error] = +''
+  initialize_m_ivars
 
-  unless valid_media_name?(@m_name)
-    @m_name = nil
-    session[:error] << INVALID_MEDIA_NAME_MESSAGE
-  end
-
-  unless valid_platform?(@m_platform)
-    @m_platform = nil
-    session[:error] << INVALID_PLATFORM_MESSAGE
-  end
-
-  unless valid_url?(@m_url)
-    @m_url = nil
-    session[:error] << INVALID_URL_MESSAGE
-  end
+  construct_error_if_invalid_media
 
   if session[:error].empty? # Checks to make sure no error messages were added to the session.
     @storage.create_media(@m_name, @m_platform, @m_url, @watchlist.id)
@@ -218,25 +204,9 @@ post '/watchlist/:watchlist_id/media/:media_id/edit' do
   @watchlist = @storage.fetch_full_watchlist(params[:watchlist_id], @user_id)
   @media = @watchlist.fetch_media(params[:media_id].to_i)
 
-  @m_name = format_input(params[:name])
-  @m_platform = format_input(params[:platform])
-  @m_url = format_input(params[:url])
-  session[:error] = +''
+  initialize_m_ivars
 
-  unless valid_media_name?(@m_name)
-    @m_name = @media.name
-    session[:error] << INVALID_MEDIA_NAME_MESSAGE
-  end
-
-  unless valid_platform?(@m_platform)
-    @m_platform = @media.platform
-    session[:error] << INVALID_PLATFORM_MESSAGE
-  end
-
-  unless valid_url?(@m_url)
-    @m_url = @media.url
-    session[:error] << INVALID_URL_MESSAGE
-  end
+  construct_error_if_invalid_media(@media)
 
   if session[:error].empty?
     @storage.edit_media(@m_name, @m_platform, @m_url, @media.id, @watchlist.id)
@@ -304,7 +274,7 @@ post '/users/sign_in' do
   user = @storage.fetch_user(username)
 
   if valid_credentials?(username, password, user)
-    session[:success] = "Welcome #{user['name']}!"
+    session[:success] = "Welcome, #{user['name']}!"
     session[:user_id] = user['id'].to_i
     redirect session.delete(:next_destination) || '/'
   else
