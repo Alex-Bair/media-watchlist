@@ -25,7 +25,7 @@
   <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page + 1%>">Next Page</a>
 <% end %>
 
-<form action="/watchlist/<%= @watchlist.id %>?page=<%= @page %>" method="post">
+<form action="/watchlist/<%= @watchlist.id %>/new_media?page=<%= @page %>" method="post">
   <fieldset>
     <p>Add a media: </p>
     <div>

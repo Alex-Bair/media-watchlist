@@ -1,3 +1,9 @@
+# HELPER METHODS
+
+require 'bcrypt'
+
+# VALIDATION 
+
 URL_REGEX = /https?:\/\/(www\.)?[a-z0-9]{1,}\.[a-z]{3}(\/[a-z0-9\-\_\%]*)*\?*([a-z0-9\-\_\%]*\=*[a-z0-9\-\_\%]*\&*)*/i
 NUMBER_REGEX = /^\d+$/
 
@@ -117,4 +123,62 @@ def valid_username?(name)
   end
 
   false
+end
+
+# AUTHENTICATION
+
+def valid_credentials?(username, password, user)
+  !username.empty? &&
+    !user.nil? &&
+    BCrypt::Password.new(user["password"]) == password
+end
+
+def signed_in?
+  !session[:user_id].nil?
+end
+
+def authenticate
+  path = request.path_info
+
+  unless ( signed_in? || 
+      path == "/users/sign_in" || 
+      path == "/users/register" )
+
+    session[:next_destination] = request.path_info
+    redirect "/users/sign_in"
+  end
+end
+
+def encrypt_password(password)
+  BCrypt::Password.create(password)
+end
+
+def sign_out
+  session.delete(:user_id)
+  session[:success] = "You have been signed out."
+end
+
+# DATABASE SETUP
+
+def database_exists?(name)
+  postgres_db = PG.connect(dbname: 'postgres')
+
+  sql = <<~SQL
+    SELECT datname
+    FROM pg_catalog.pg_database
+    WHERE datname = $1;
+  SQL
+
+  result = postgres_db.exec_params(sql, [name])
+
+  postgres_db.close
+
+  result.ntuples == 1
+end
+
+def setup_database
+  # rubocop:disable Style/ExpandPathArguments
+  create_database_file = File.expand_path('../lib/create_database.rb', __FILE__)
+  # rubocop:enable Style/ExpandPathArguments
+  load create_database_file
 end
