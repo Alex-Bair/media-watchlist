@@ -4,9 +4,19 @@ require 'pg'
 # rubocop: disable Metrics/ClassLength
 # Class encapsulates interactions with the media_watchlist database
 class DatabasePersistence
-  def initialize(logger)
+  def initialize(logger = nil)
     @database = PG.connect(dbname: 'media_watchlist')
-    @logger = logger
+    @logger = logger if logger
+  end
+
+  def drop_tables
+    @database.exec('DROP TABLE media')
+    @database.exec('DROP TABLE watchlists')
+    @database.exec('DROP TABLE users')
+  end
+
+  def close
+    @database.close
   end
 
   # USER RELATED INTERFACE
@@ -215,7 +225,7 @@ class DatabasePersistence
   private
 
   def query(statement, *params)
-    @logger.info "#{statement}: #{params}"
+    @logger.info "#{statement}: #{params}" if @logger
     @database.exec_params(statement, params)
   end
 

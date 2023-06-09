@@ -208,7 +208,7 @@ SELECT pg_catalog.setval('public.media_id_seq', 29, true);
 --
 
 COPY public.users (id, name, password) FROM stdin;
-1	admin	$2a$12$i0v.IElC.H.8sKuIzEd00OhdXxAHwHCs8jVtCC8aC4A1qIEdvgIQW
+1	admin	$2a$12$Bc/jfIa6Hu7xBhHerpUp7enJS446Y5KM7yXxixOjwwczip3IvpeJC
 \.
 
 

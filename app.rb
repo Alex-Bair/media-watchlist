@@ -14,7 +14,7 @@ DISPLAY_LIMIT = 5
 
 configure do
   enable :sessions
-  set :session_secret, ENV['SESSION_SECRET'] { SecureRandom.hex(64) }
+  set :session_secret, "20a14eeaa8fdc4d73e8d460204b2b2c3411b4f21c4fa94a9f9d7e7688d498e4c11b13d48f958ea70447c3436d8f01e2b31a6cd98f055e137d3be18ada0b5e653"  # ENV['SESSION_SECRET'] { SecureRandom.hex(64) }
   set :erb, escape_html: true # does this work to avoid JS injection?
 
   setup_database unless database_exists?('media_watchlist')
@@ -242,11 +242,14 @@ end
 # Create a new user
 
 post '/users/register' do
+  redirect_if_signed_in
+
   username = format_input(params[:username])
   password = params[:password]
 
-  if valid_username?(username)
+  if valid_username?(username) && valid_password?(password)
     @storage.create_user(username, encrypt_password(password))
+    session[:success] = 'Profile creation successful.'
     redirect '/users/sign_in'
   else
     status 422
@@ -257,10 +260,7 @@ end
 # Display sign in page
 
 get '/users/sign_in' do
-  if @user_id
-    session[:error] = 'You are already signed in.'
-    redirect session[:previous_path]
-  end
+  redirect_if_signed_in
 
   erb :sign_in
 end
@@ -268,12 +268,12 @@ end
 # Sign in a user
 
 post '/users/sign_in' do
-  username = format_input(params[:username])
+  @username = format_input(params[:username])
   password = params[:password]
 
-  user = @storage.fetch_user(username)
+  user = @storage.fetch_user(@username)
 
-  if valid_credentials?(username, password, user)
+  if valid_credentials?(@username, password, user)
     session[:success] = "Welcome, #{user['name']}!"
     session[:user_id] = user['id'].to_i
     redirect session.delete(:next_destination) || '/'

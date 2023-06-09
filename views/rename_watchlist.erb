@@ -1,4 +1,4 @@
-<h1>Rename Watch List</h1>
+<h1>Rename Watchlist</h1>
 
 <form action="/watchlist/<%= @watchlist.id %>/rename" method="post">
   <fieldset>
@@ -6,6 +6,6 @@
       <label for="new_name">New name for <%= @watchlist.name %>: </label>
       <input type="text" id="new_name" name="new_name" value="<%= @watchlist.name %>" required>
     </div>
-    <button>Rename watch list</button>
+    <button>Rename watchlist</button>
   </fieldset>
 </form>

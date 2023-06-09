@@ -19,11 +19,14 @@ NUMBER_REGEX = /^\d+$/
 
 NAME_CHAR_LIMIT = 60
 PLATFORM_CHAR_LIMIT = 20
+PASSWORD_CHAR_MINIMUM = 8
 
 INVALID_WATCHLIST_NAME_MESSAGE = "Name must be unique and between 1 and #{NAME_CHAR_LIMIT} characters. ".freeze
 INVALID_MEDIA_NAME_MESSAGE = "Name must be between 1 and #{NAME_CHAR_LIMIT} characters. ".freeze
 INVALID_PLATFORM_MESSAGE = "Platform must be between 1 and #{PLATFORM_CHAR_LIMIT} characters. ".freeze
 INVALID_URL_MESSAGE = 'Invalid URL. '
+INVALID_USERNAME_MESSAGE = "Username must be between 1 and #{NAME_CHAR_LIMIT} characters. ".freeze
+INVALID_PASSWORD_MESSAGE = "Password must be at least #{PASSWORD_CHAR_MINIMUM} characters. ".freeze
 
 def invalid_page_number_error(max, items)
   if max == 1
@@ -119,14 +122,21 @@ end
 
 def valid_username?(name)
   if username_exists?(name)
-    session[:error] = "A profile already exists for user #{username}."
-  elsif !shorter_than?(name, NAME_CHAR_LIMIT)
-    session[:error] = "Username must be shorter than #{NAME_CHAR_LIMIT} characters."
+    session[:error] = "A profile already exists for user #{name}."
+  elsif !shorter_than?(name, NAME_CHAR_LIMIT) || all_whitespace?(name)
+    session[:error] = INVALID_USERNAME_MESSAGE
   else
-    session[:success] = 'Profile creation successful.'
+    @username = name
     return true
   end
 
+  false
+end
+
+def valid_password?(password)
+  return true if password.size >= PASSWORD_CHAR_MINIMUM
+
+  session[:error] = INVALID_PASSWORD_MESSAGE
   false
 end
 
@@ -140,6 +150,13 @@ end
 
 def signed_in?
   !session[:user_id].nil?
+end
+
+def redirect_if_signed_in
+  if signed_in?
+    session[:error] = 'You are already signed in.'
+    redirect session[:previous_path]
+  end
 end
 
 def authenticate
@@ -183,7 +200,7 @@ end
 
 def setup_database
   # rubocop:disable Style/ExpandPathArguments
-  create_database_file = File.expand_path('../lib/create_database.rb', __FILE__)
+  create_database_file = File.expand_path('../create_database.rb', __FILE__)
   # rubocop:enable Style/ExpandPathArguments
   load create_database_file
 end

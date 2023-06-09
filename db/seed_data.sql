@@ -1,6 +1,6 @@
 INSERT INTO users (name, password)
 VALUES 
-('admin', '$2a$12$i0v.IElC.H.8sKuIzEd00OhdXxAHwHCs8jVtCC8aC4A1qIEdvgIQW'); -- password is 'secret'
+('admin', '$2a$12$Bc/jfIa6Hu7xBhHerpUp7enJS446Y5KM7yXxixOjwwczip3IvpeJC'); -- password is 'supersecret'
 
 INSERT INTO watchlists (name, user_id)
 VALUES
