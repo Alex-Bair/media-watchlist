@@ -208,9 +208,12 @@ SELECT pg_catalog.setval('public.media_id_seq', 29, true);
 --
 
 COPY public.users (id, name, password) FROM stdin;
-1	admin	$2a$12$Bc/jfIa6Hu7xBhHerpUp7enJS446Y5KM7yXxixOjwwczip3IvpeJC -- password is 'supersecret'
+1	admin	$2a$12$iAHxqZ4KYj8G8KraNQcfv.2IUwVPp3y2M03LL.yV4s7ikmXs8WApm
 \.
 
+--
+-- admin password is 'supersecret'
+--
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ec2-user

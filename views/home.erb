@@ -1,30 +1,36 @@
-<ul>
-  <% @watchlists.each do |row| %>
-    <li>
-      <a href="/watchlist/<%= row[:id] %>"><%= row[:name] %></a>
-      <a href="/watchlist/<%= row[:id] %>/rename">Rename</a>
-      <form action="/watchlist/<%= row[:id] %>/delete" method="post">
-        <button>Delete</button>
-      </form>
-    </li>
-  <% end %>
-</ul>
+<section class="watchlist-section">
+  <h1>Watchlists</h1>
 
-<% if @page > 1 %>
-  <a href="/?page=<%= @page - 1%>">Previous Page</a>
-<% end %>
+  <ul>
+    <% @watchlists.each do |row| %>
+      <li class="watchlist">
+        <a class="wl-name" href="/watchlist/<%= row[:id] %>"><%= row[:name] %></a>
+        <a class="wl-rename" href="/watchlist/<%= row[:id] %>/rename">Rename</a>
+        <form class ="wl-delete" action="/watchlist/<%= row[:id] %>/delete" method="post">
+          <button>Delete</button>
+        </form>
+      </li>
+    <% end %>
+  </ul>
 
-<% if @page < @max_page %>
-  <a href="/?page=<%= @page + 1%>">Next Page</a>
-<% end %>
+  <nav class="page-links">
+    <% if @page > 1 %>
+      <a href="/?page=<%= @page - 1%>">Previous Page</a>
+    <% end %>
+  
+    <% if @page < @max_page %>
+      <a href="/?page=<%= @page + 1%>">Next Page</a>
+    <% end %>
+  </nav>
 
-<form action="/new_watchlist?page=<%= @page %>" method="post">
-  <p>Create new watchlist</p>
-  <fieldset>
-    <div>
-      <label for="name">Name: </label>
-      <input id="name" name="name" type="text" required>
-    </div>
-    <button>Create watchlist</button>
-  </fieldset>
-</form>
+  <form class="new-watchlist" action="/new_watchlist?page=<%= @page %>" method="post">
+    <p>Create new watchlist</p>
+    <fieldset>
+      <div>
+        <label for="name">Name: </label>
+        <input id="name" name="name" type="text" required>
+      </div>
+      <button>Create watchlist</button>
+    </fieldset>
+  </form>
+</section>

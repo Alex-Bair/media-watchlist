@@ -1,0 +1,125 @@
+html {
+  background-color: #2f3233;
+  color: #f5f5f6;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 30px;
+  height: 100%;
+}
+
+body {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+main {
+  flex: 1 0 auto;
+  padding: 10px;
+}
+
+header, footer {
+  background-color: #5e6466;
+}
+
+footer {
+  text-align: center;
+}
+
+header a, footer a {
+  color: #f5f5f6;
+  text-decoration: none;
+}
+
+a {
+  color: #04a1d3;
+  text-decoration: none;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 30px 10px 10px;
+}
+
+header h1 {
+  display: inline-block;
+}
+
+main > h1 {
+  margin-bottom: 15px;
+}
+
+.watchlist {
+  display: grid;
+  grid-template-columns: 9fr 1fr 150px 150px;
+  grid-template-areas:
+  "wl-name . rename delete";
+  align-items: center;
+  justify-items: start;
+}
+
+.wl-name {
+  grid-area: wl-name;
+}
+
+.wl-rename {
+  grid-area: rename;
+}
+
+.wl-delete {
+  grid-area: delete;
+}
+
+.media {
+  display: grid;
+  grid-template-columns: 3fr 1fr 100px 100px;;
+  grid-template-areas:
+  "media-name media-platform media-edit media-delete";
+  align-items: center;
+  justify-items: start;
+}
+
+form.new-watchlist, form.new-media {
+  border-top: 4px double #e0e0e0;
+  margin-top: 40px;
+  padding-top: 10px;
+}
+
+input {
+  font-size: 0.8rem;
+}
+
+button {
+  background-color: #2f3233;
+  border: 1px solid #6a7073;
+  border-radius: 5px;
+  color: #f5f5f6;
+  font-size: 0.8rem;
+  line-height: 1.2rem;
+  text-align: center;
+  margin: 20px 0;
+}
+
+button:hover {
+  color: #36393b;
+  background-color: #eeeeee;
+}
+
+.flash-container {
+  min-height: 50px;
+}
+
+.flash {
+  text-align: center;
+}
+
+.error {
+  background-color: #7e0000;
+  color: #ff7e7e;
+}
+
+.success {
+  background-color: #036E29;
+  color: #07f45b;
+}

@@ -210,7 +210,7 @@ post '/watchlist/:watchlist_id/media/:media_id/edit' do
 
   if session[:error].empty?
     @storage.edit_media(@m_name, @m_platform, @m_url, @media.id, @watchlist.id)
-    session[:success] = 'Update was successful.'
+    session[:success] = 'Update was successful.' unless media_not_changed?
     redirect "/watchlist/#{@watchlist.id}"
   else
     status 422

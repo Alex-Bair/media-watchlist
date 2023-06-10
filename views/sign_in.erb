@@ -1,22 +1,23 @@
-<h1>Sign In</h1>
+<section>
+  <h1>Sign In</h1>
 
-<p>Please sign in to continue.</p>
+  <form action="/users/sign_in" method="post">
+    <p>Please sign in to continue.</p>
+    <fieldset>
+      <div>
+        <label for="username">Username: </label>
+        <input type="text" id="username" name="username" value="<%= @username %>" required>
+      </div>
+      <div>
+        <label for="password">Password: </label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button>Sign in</button>
+    </fieldset>
+  </form>
 
-<form action="/users/sign_in" method="post">
-  <fieldset>
-    <div>
-      <label for="username">Username: </label>
-      <input type="text" id="username" name="username" value="<%= @username %>" required>
-    </div>
-    <div>
-      <label for="password">Password: </label>
-      <input type="password" id="password" name="password" required>
-    </div>
-    <button>Sign in</button>
-  </fieldset>
-</form>
-
-<p>
-  No account? 
-  <a href="/users/register">Register a new account.</a>
-</p>
+  <p>
+    No account? 
+    <a href="/users/register">Register a new account.</a>
+  </p>
+</section>

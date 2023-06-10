@@ -1,48 +1,53 @@
-<h1><%= @watchlist.name %></h1>
+<section class="media-section">
 
-<ul>
-  <% @watchlist.each do |m| %>
-    <li>
-      <% unless m.url.empty? %>
-        <a class="media-name" target="_blank" href="<%= m.url %>"><%= m.name %></a>
-      <% else %>
-        <p class="media-name"><%= m.name %></p>
-      <% end %>
-      <p><%= m.platform %></p>
-      <a href="/watchlist/<%= @watchlist.id %>/media/<%= m.id %>/edit">Edit</a>
-      <form action="/watchlist/<%= @watchlist.id %>/media/<%= m.id %>/delete" method="post">
-        <button>Delete</button>
-      </form>
-    </li>
-  <% end %>
-</ul>
+  <h1><%= @watchlist.name %> watchlist</h1>
 
-<% if @page > 1 %>
-  <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page - 1%>">Previous Page</a>
-<% end %>
+  <ul>
+    <% @watchlist.each do |m| %>
+      <li class="media">
+        <% unless m.url.empty? %>
+          <a class="media-name" target="_blank" href="<%= m.url %>"><%= m.name %></a>
+        <% else %>
+          <p class="media-name"><%= m.name %></p>
+        <% end %>
+        <p class="media-platform"><%= m.platform %></p>
+        <a class="media-edit" href="/watchlist/<%= @watchlist.id %>/media/<%= m.id %>/edit">Edit</a>
+        <form class="media-delete" action="/watchlist/<%= @watchlist.id %>/media/<%= m.id %>/delete" method="post">
+          <button>Delete</button>
+        </form>
+      </li>
+    <% end %>
+  </ul>
 
-<% if @page < @max_page %>
-  <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page + 1%>">Next Page</a>
-<% end %>
+  <nav class="page-links">
+    <% if @page > 1 %>
+      <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page - 1%>">Previous Page</a>
+    <% end %>
 
-<form action="/watchlist/<%= @watchlist.id %>/new_media?page=<%= @page %>" method="post">
-  <fieldset>
-    <p>Add a media: </p>
-    <div>
-      <label for="name">Name: </label>
-      <input id="name" name="name" type="text" value="<%= @m_name %>" required>
-    </div>
-    <div>
-      <label for="platform">Platform: </label>
-      <input id="platform" name="platform" type="text" value="<%= @m_platform %>" required>
-    </div>
-    <div>
-      <label for="url">URL: </label>
-      <input id="url" name="url" type="url" value="<%= @m_url %>">
-    </div>
-    <div>
-      <input type="hidden" name="page" value="<%= params[:page] %>">
-    </div>
-    <button>Create media</button>
-  </fieldset>
-</form>
+    <% if @page < @max_page %>
+      <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page + 1%>">Next Page</a>
+    <% end %>
+  </nav>
+
+  <form class="new-media" action="/watchlist/<%= @watchlist.id %>/new_media?page=<%= @page %>" method="post">
+    <fieldset>
+      <p>Add a media: </p>
+      <div>
+        <label for="name">Name: </label>
+        <input id="name" name="name" type="text" value="<%= @m_name %>" required>
+      </div>
+      <div>
+        <label for="platform">Platform: </label>
+        <input id="platform" name="platform" type="text" value="<%= @m_platform %>" required>
+      </div>
+      <div>
+        <label for="url">URL: </label>
+        <input id="url" name="url" type="url" value="<%= @m_url %>">
+      </div>
+      <div>
+        <input type="hidden" name="page" value="<%= params[:page] %>">
+      </div>
+      <button>Create media</button>
+    </fieldset>
+  </form>
+</section>

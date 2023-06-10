@@ -238,8 +238,8 @@ class AppTest < Minitest::Test
     refute_equal(last_response.body, 'valid_name')
 
     post '/watchlist/1/new_media', { name: 'valid_name',
-                                     platform: 'valid_platform',
-                                     url: 'https://www.validurl.com' }
+                                    platform: 'valid_platform',
+                                    url: 'https://www.validurl.com' }
 
     assert_equal(302, last_response.status)
     assert_includes(session[:success], 'valid_name was added to Fitness')
@@ -252,8 +252,8 @@ class AppTest < Minitest::Test
 
   def test_add_media_error_invalid_name
     post '/watchlist/1/new_media', { name: '   ',
-                                     platform: 'valid_platform',
-                                     url: 'https://www.validurl.com' }, admin_session
+                                    platform: 'valid_platform',
+                                    url: 'https://www.validurl.com' }, admin_session
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Name must be between 1 and ')
@@ -263,8 +263,8 @@ class AppTest < Minitest::Test
 
   def test_add_media_error_invalid_platform
     post '/watchlist/1/new_media', { name: 'valid_name',
-                                     platform: '   ',
-                                     url: 'https://www.validurl.com' }, admin_session
+                                    platform: '   ',
+                                    url: 'https://www.validurl.com' }, admin_session
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Platform must be between 1 and ')
@@ -274,8 +274,8 @@ class AppTest < Minitest::Test
 
   def test_add_media_error_invalid_url
     post '/watchlist/1/new_media', { name: 'valid_name',
-                                     platform: 'valid_platform',
-                                     url: 'bad url' }, admin_session
+                                    platform: 'valid_platform',
+                                    url: 'bad url' }, admin_session
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Invalid URL')
@@ -283,8 +283,8 @@ class AppTest < Minitest::Test
 
   def test_add_media_error_invalid_name_platform_url
     post '/watchlist/1/new_media', { name: '   ',
-                                     platform: '  ',
-                                     url: 'bad url' }, admin_session
+                                    platform: '  ',
+                                    url: 'bad url' }, admin_session
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Name must be between 1 and ')

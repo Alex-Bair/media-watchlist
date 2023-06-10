@@ -246,3 +246,9 @@ def construct_error_if_invalid_media(default = nil)
 
   check_media_inputs(default)
 end
+
+def media_not_changed?
+  @media.name == @m_name &&
+    @media.platform == @m_platform &&
+    @media.url == @m_url
+end
