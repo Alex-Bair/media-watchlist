@@ -199,10 +199,7 @@ def database_exists?(name)
 end
 
 def setup_database
-  # rubocop:disable Style/ExpandPathArguments
-  create_database_file = File.expand_path('../create_database.rb', __FILE__)
-  # rubocop:enable Style/ExpandPathArguments
-  load create_database_file
+  system 'createdb media_watchlist' unless database_exists?('media_watchlist')
 end
 
 # MEDIA RELATED ROUTE HELPERS

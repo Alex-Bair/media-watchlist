@@ -34,10 +34,10 @@ class AppTest < Minitest::Test
 
   def import_seed_data
     # rubocop:disable Style/ExpandPathArguments
-    seed_data_path = File.expand_path('../../db/media_watchlist_dump.sql', __FILE__)
+    seed_data_path = File.expand_path('../../db/media_watchlist_dump.sql', __FILE__) # File.expand_path('../../db/media_watchlist_dump.sql', __FILE__)
     # rubocop:enable Style/ExpandPathArguments
 
-    system "psql -d media_watchlist < #{seed_data_path} > /dev/null 2>&1"
+    system "psql -d media_watchlist_test < #{seed_data_path} > /dev/null 2>&1"
   end
 
   def admin_session
@@ -45,7 +45,7 @@ class AppTest < Minitest::Test
   end
 
   def setup
-    system 'createdb media_watchlist' unless database_exists?('media_watchlist')
+    system 'createdb media_watchlist_test' unless database_exists?('media_watchlist_test')
     import_seed_data
     @database = DatabasePersistence.new
   end

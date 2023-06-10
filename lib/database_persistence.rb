@@ -5,8 +5,13 @@ require 'pg'
 # Class encapsulates interactions with the media_watchlist database
 class DatabasePersistence
   def initialize(logger = nil)
-    @database = PG.connect(dbname: 'media_watchlist')
+    @database = if ENV['RACK_ENV'] == 'test'
+                  PG.connect(dbname: 'media_watchlist_test')
+                else
+                  PG.connect(dbname: 'media_watchlist')
+                end
     @logger = logger if logger
+    setup_schema
   end
 
   def drop_tables
@@ -17,6 +22,24 @@ class DatabasePersistence
 
   def close
     @database.close
+  end
+
+  def setup_schema
+    sql = <<~SQL
+      SELECT COUNT(*)
+        FROM information_schema.tables
+       WHERE (table_schema = 'public' AND table_name = 'users') OR
+             (table_schema = 'public' AND table_name = 'watchlists') OR
+             (table_schema = 'public' AND table_name = 'media');
+    SQL
+    
+    result = @database.query(sql)
+    
+    if result[0]['count'].to_i < 3
+      schema_path = File.expand_path('../../db/schema.sql', __FILE__)
+      schema_sql = File.read(schema_path)
+      @database.exec(schema_sql)
+    end
   end
 
   # USER RELATED INTERFACE
