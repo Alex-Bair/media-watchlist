@@ -155,8 +155,13 @@ end
 def redirect_if_signed_in
   if signed_in?
     session[:error] = 'You are already signed in.'
-    redirect session[:previous_path]
+    redirect session[:previous_path] unless sign_in_or_registration?(session[:previous_path])
+    redirect '/'
   end
+end
+
+def sign_in_or_registration?(path)
+  path == '/users/sign_in' || path == '/users/register'
 end
 
 def authenticate

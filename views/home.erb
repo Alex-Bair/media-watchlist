@@ -14,13 +14,17 @@
   </ul>
 
   <nav class="page-links">
-    <% if @page > 1 %>
-      <a href="/?page=<%= @page - 1%>">Previous Page</a>
-    <% end %>
-  
-    <% if @page < @max_page %>
-      <a href="/?page=<%= @page + 1%>">Next Page</a>
-    <% end %>
+    <div class="prev-page-container">
+      <% if @page > 1 %>
+        <a href="/?page=<%= @page - 1%>">Previous Page</a>
+      <% end %>
+    </div>
+
+    <div class="next-page-container">
+      <% if @page < @max_page %>
+        <a href="/?page=<%= @page + 1%>">Next Page</a>
+      <% end %>
+    </div>
   </nav>
 
   <form class="new-watchlist" action="/new_watchlist?page=<%= @page %>" method="post">

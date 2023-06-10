@@ -20,18 +20,22 @@
   </ul>
 
   <nav class="page-links">
-    <% if @page > 1 %>
-      <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page - 1%>">Previous Page</a>
-    <% end %>
+    <div class="prev-page-container">
+      <% if @page > 1 %>
+        <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page - 1%>">Previous Page</a>
+      <% end %>
+    </div>
 
-    <% if @page < @max_page %>
-      <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page + 1%>">Next Page</a>
-    <% end %>
+    <div class="next-page-container">
+      <% if @page < @max_page %>
+        <a href="/watchlist/<%= @watchlist.id %>?page=<%= @page + 1%>">Next Page</a>
+      <% end %>
+    </div>
   </nav>
 
   <form class="new-media" action="/watchlist/<%= @watchlist.id %>/new_media?page=<%= @page %>" method="post">
+    <p>Add a media: </p>
     <fieldset>
-      <p>Add a media: </p>
       <div>
         <label for="name">Name: </label>
         <input id="name" name="name" type="text" value="<%= @m_name %>" required>

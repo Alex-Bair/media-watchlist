@@ -421,7 +421,7 @@ class AppTest < Minitest::Test
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, 'Please create a profile')
     assert_includes(last_response.body, 'Register</button>')
-    assert_includes(last_response.body, '<p>Already have an account?')
+    assert_includes(last_response.body, 'Already have an account?')
   end
 
   def test_register_user

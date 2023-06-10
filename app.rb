@@ -72,7 +72,8 @@ end
 # Store previous path for possible redirects
 
 after do
-  session[:previous_path] = "#{request.path_info}?#{request.query_string}"
+  query_string = "?#{request.query_string}" unless request.query_string.empty?
+  session[:previous_path] = "#{request.path_info}#{query_string}"
 end
 
 # ROUTES
@@ -236,14 +237,14 @@ end
 # Display registration page
 
 get '/users/register' do
+  redirect_if_signed_in
+
   erb :register
 end
 
 # Create a new user
 
 post '/users/register' do
-  redirect_if_signed_in
-
   username = format_input(params[:username])
   password = params[:password]
 

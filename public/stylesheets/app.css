@@ -2,8 +2,16 @@ html {
   background-color: #2f3233;
   color: #f5f5f6;
   font-family: Helvetica, Arial, sans-serif;
-  font-size: 30px;
+  font-size: 24px;
   height: 100%;
+}
+
+h1 {
+  font-size: 30px;
+}
+
+nav {
+  font-size: 0.8rem;
 }
 
 body {
@@ -46,8 +54,12 @@ header h1 {
   display: inline-block;
 }
 
-main > h1 {
+main section > h1 {
   margin-bottom: 15px;
+}
+
+ul {
+  min-height: 400px;
 }
 
 .watchlist {
@@ -73,17 +85,54 @@ main > h1 {
 
 .media {
   display: grid;
-  grid-template-columns: 3fr 1fr 100px 100px;;
+  grid-template-columns: 3fr 1fr 100px 100px;
   grid-template-areas:
   "media-name media-platform media-edit media-delete";
   align-items: center;
   justify-items: start;
 }
 
+.media-name {
+  grid-area: media-name;
+}
+
+.media-platform {
+  grid-area: media-platform;
+}
+
+.media-edit {
+  grid-area: media-edit
+}
+
+.media-delete {
+  grid-area: media-delete
+}
+
+.page-links {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: 2fr 200px 1fr 200px 2fr;
+  grid-template-areas:
+  ". prev-page . next-page .";
+  justify-items: center;
+}
+
+.prev-page-container {
+  grid-area: prev-page;
+}
+
+.next-page-container {
+  grid-area: next-page;
+}
+
 form.new-watchlist, form.new-media {
   border-top: 4px double #e0e0e0;
   margin-top: 40px;
-  padding-top: 10px;
+  padding-top: 20px;
+}
+
+fieldset {
+  margin-top: 10px;
 }
 
 input {
