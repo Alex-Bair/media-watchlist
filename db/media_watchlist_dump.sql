@@ -215,6 +215,7 @@ COPY public.users (id, name, password) FROM stdin;
 -- admin password is 'supersecret'
 --
 
+
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ec2-user
 --
@@ -245,7 +246,7 @@ COPY public.watchlists (id, name, user_id) FROM stdin;
 -- Name: watchlists_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ec2-user
 --
 
-SELECT pg_catalog.setval('public.watchlists_id_seq', 11, true);
+SELECT pg_catalog.setval('public.watchlists_id_seq', 12, true);
 
 
 --
@@ -273,11 +274,11 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: watchlists watchlists_name_key; Type: CONSTRAINT; Schema: public; Owner: ec2-user
+-- Name: watchlists watchlists_name_user_id_key; Type: CONSTRAINT; Schema: public; Owner: ec2-user
 --
 
 ALTER TABLE ONLY public.watchlists
-    ADD CONSTRAINT watchlists_name_key UNIQUE (name);
+    ADD CONSTRAINT watchlists_name_user_id_key UNIQUE (name, user_id);
 
 
 --

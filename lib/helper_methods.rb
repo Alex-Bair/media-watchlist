@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# HELPER METHODS
-
 require 'bcrypt'
 
 # VALIDATION
@@ -153,15 +151,15 @@ def signed_in?
 end
 
 def redirect_if_signed_in
-  if signed_in?
-    session[:error] = 'You are already signed in.'
-    redirect session[:previous_path] unless sign_in_or_registration?(session[:previous_path])
-    redirect '/'
-  end
+  return unless signed_in?
+
+  session[:error] = 'You are already signed in.'
+  redirect session[:previous_path] unless sign_in_or_registration?(session[:previous_path])
+  redirect '/'
 end
 
 def sign_in_or_registration?(path)
-  path == '/users/sign_in' || path == '/users/register'
+  ['/users/sign_in', '/users/register'].include?(path)
 end
 
 def authenticate

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require 'bundler/setup'
 require 'sinatra'
 require 'tilt/erubis'
 require 'securerandom'
-require 'pry' # REMOVE FROM FINAL
 
 require_relative 'lib/media'
 require_relative 'lib/watchlist'
@@ -14,8 +14,11 @@ DISPLAY_LIMIT = 5
 
 configure do
   enable :sessions
-  set :session_secret, "20a14eeaa8fdc4d73e8d460204b2b2c3411b4f21c4fa94a9f9d7e7688d498e4c11b13d48f958ea70447c3436d8f01e2b31a6cd98f055e137d3be18ada0b5e653"  # ENV['SESSION_SECRET'] { SecureRandom.hex(64) }
-  set :erb, escape_html: true # does this work to avoid JS injection?
+
+  # rubocop:disable Layout/LineLength
+  set :session_secret, '20a14eeaa8fdc4d73e8d460204b2b2c3411b4f21c4fa94a9f9d7e7688d498e4c11b13d48f958ea70447c3436d8f01e2b31a6cd98f055e137d3be18ada0b5e653'
+  # rubocop:enable Layout/LineLength
+  set :erb, escape_html: true
 
   setup_database unless database_exists?('media_watchlist')
 end

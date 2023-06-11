@@ -24,6 +24,7 @@ class DatabasePersistence
     @database.close
   end
 
+  # rubocop:disable Metrics/MethodLength
   def setup_schema
     sql = <<~SQL
       SELECT COUNT(*)
@@ -32,15 +33,18 @@ class DatabasePersistence
              (table_schema = 'public' AND table_name = 'watchlists') OR
              (table_schema = 'public' AND table_name = 'media');
     SQL
-    
+
     result = @database.query(sql)
-    
-    if result[0]['count'].to_i < 3
-      schema_path = File.expand_path('../../db/schema.sql', __FILE__)
-      schema_sql = File.read(schema_path)
-      @database.exec(schema_sql)
-    end
+
+    return unless result[0]['count'].to_i < 3
+
+    # rubocop:disable  Style/ExpandPathArguments
+    schema_path = File.expand_path('../../db/schema.sql', __FILE__)
+    # rubocop:enable Style/ExpandPathArguments
+    schema_sql = File.read(schema_path)
+    @database.exec(schema_sql)
   end
+  # rubocop:enable Metrics/MethodLength
 
   # USER RELATED INTERFACE
 
@@ -248,7 +252,7 @@ class DatabasePersistence
   private
 
   def query(statement, *params)
-    @logger.info "#{statement}: #{params}" if @logger
+    @logger&.info "#{statement}: #{params}"
     @database.exec_params(statement, params)
   end
 

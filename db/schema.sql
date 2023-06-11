@@ -6,8 +6,9 @@ CREATE TABLE users (
 
 CREATE TABLE watchlists (
   id serial PRIMARY KEY,
-  name varchar(60) UNIQUE NOT NULL,
-  user_id int NOT NULL REFERENCES users (id) ON DELETE CASCADE
+  name varchar(60) NOT NULL,
+  user_id int NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  UNIQUE (name, user_id)
 );
 
 CREATE TABLE media (
