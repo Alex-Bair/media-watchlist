@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ENV['RACK_ENV'] = 'test'
 
 require 'minitest/autorun'
@@ -5,6 +7,7 @@ require 'rack/test'
 
 require_relative '../app'
 
+# rubocop:disable Metrics/AbcSize, Metrics/ClassLength, Metrics/MethodLength
 class AppTest < Minitest::Test
   include Rack::Test::Methods
 
@@ -18,30 +21,31 @@ class AppTest < Minitest::Test
 
   def database_exists?(name)
     postgres_db = PG.connect(dbname: 'postgres')
-  
+
     sql = <<~SQL
       SELECT datname
       FROM pg_catalog.pg_database
       WHERE datname = $1;
     SQL
-  
+
     result = postgres_db.exec_params(sql, [name])
-  
+
     postgres_db.close
-  
+
     result.ntuples == 1
   end
 
   def import_seed_data
     # rubocop:disable Style/ExpandPathArguments
-    seed_data_path = File.expand_path('../../db/media_watchlist_dump.sql', __FILE__) # File.expand_path('../../db/media_watchlist_dump.sql', __FILE__)
+    seed_data_path = File.expand_path('../../db/media_watchlist_dump.sql', __FILE__)
     # rubocop:enable Style/ExpandPathArguments
 
+    # the '> /dev/null 2>&1' portion of the command prevents the SQL confirmation from being printed on the screen
     system "psql -d media_watchlist_test < #{seed_data_path} > /dev/null 2>&1"
   end
 
   def admin_session
-    { "rack.session" => {user_id: 1} }
+    { 'rack.session' => { user_id: 1 } }
   end
 
   def setup
@@ -56,7 +60,7 @@ class AppTest < Minitest::Test
   end
 
   def test_home_logged_out
-    get "/"
+    get '/'
 
     assert_equal(302, last_response.status)
     assert_equal('/', session[:next_destination])
@@ -80,7 +84,7 @@ class AppTest < Minitest::Test
   end
 
   def test_home_error_invalid_page_number
-    get '/', {page: 100}, admin_session
+    get '/', { page: 100 }, admin_session
 
     assert_equal(302, last_response.status)
     assert_includes(session[:error], 'Invalid page number - there are only 3 pages of watchlists')
@@ -97,7 +101,7 @@ class AppTest < Minitest::Test
     assert_equal(200, last_response.status)
     refute_includes(last_response.body, 'Test Watchlist')
 
-    post '/new_watchlist?page=3', {name: 'Test Watchlist'}
+    post '/new_watchlist?page=3', { name: 'Test Watchlist' }
 
     assert_equal(302, last_response.status)
     assert_includes(session[:success], 'Test Watchlist was created.')
@@ -122,7 +126,7 @@ class AppTest < Minitest::Test
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, 'Fitness')
 
-    post '/watchlist/1/rename', {new_name: 'Test Watchlist'}
+    post '/watchlist/1/rename', { new_name: 'Test Watchlist' }
 
     assert_equal(302, last_response.status)
     assert_includes(session[:success], 'Fitness was renamed to Test Watchlist')
@@ -139,7 +143,7 @@ class AppTest < Minitest::Test
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, 'Fitness')
 
-    post '/watchlist/1/rename', {new_name: 'Music'}
+    post '/watchlist/1/rename', { new_name: 'Music' }
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Name must be unique and between 1 and')
@@ -151,7 +155,7 @@ class AppTest < Minitest::Test
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, 'Fitness')
 
-    post '/watchlist/1/rename', {new_name: '  '}
+    post '/watchlist/1/rename', { new_name: '  ' }
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Name must be unique and between 1 and')
@@ -164,7 +168,7 @@ class AppTest < Minitest::Test
     assert_includes(last_response.body, 'Fitness')
 
     post '/watchlist/1/delete'
-    
+
     assert_equal(302, last_response.status)
     assert_includes(session[:success], 'Fitness was deleted.')
 
@@ -175,7 +179,7 @@ class AppTest < Minitest::Test
   end
 
   def test_view_watchlist
-    get '/watchlist/2', {page: 2}, admin_session
+    get '/watchlist/2', { page: 2 }, admin_session
 
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, 'Moonlight Serendipity')
@@ -204,7 +208,7 @@ class AppTest < Minitest::Test
   end
 
   def test_view_watchlist_last_page
-    get '/watchlist/2', {page: 5}, admin_session
+    get '/watchlist/2', { page: 5 }, admin_session
 
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, 'Smile Bomb')
@@ -225,7 +229,7 @@ class AppTest < Minitest::Test
   end
 
   def test_view_watchlist_error_invalid_page_number
-    get '/watchlist/1', {page: 50}, admin_session
+    get '/watchlist/1', { page: 50 }, admin_session
 
     assert_equal(302, last_response.status)
     assert_includes(session[:error], 'Invalid page number - there is only 1 page of media')
@@ -238,8 +242,8 @@ class AppTest < Minitest::Test
     refute_equal(last_response.body, 'valid_name')
 
     post '/watchlist/1/new_media', { name: 'valid_name',
-                                    platform: 'valid_platform',
-                                    url: 'https://www.validurl.com' }
+                                     platform: 'valid_platform',
+                                     url: 'https://www.validurl.com' }
 
     assert_equal(302, last_response.status)
     assert_includes(session[:success], 'valid_name was added to Fitness')
@@ -252,8 +256,8 @@ class AppTest < Minitest::Test
 
   def test_add_media_error_invalid_name
     post '/watchlist/1/new_media', { name: '   ',
-                                    platform: 'valid_platform',
-                                    url: 'https://www.validurl.com' }, admin_session
+                                     platform: 'valid_platform',
+                                     url: 'https://www.validurl.com' }, admin_session
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Name must be between 1 and ')
@@ -263,8 +267,8 @@ class AppTest < Minitest::Test
 
   def test_add_media_error_invalid_platform
     post '/watchlist/1/new_media', { name: 'valid_name',
-                                    platform: '   ',
-                                    url: 'https://www.validurl.com' }, admin_session
+                                     platform: '   ',
+                                     url: 'https://www.validurl.com' }, admin_session
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Platform must be between 1 and ')
@@ -274,8 +278,8 @@ class AppTest < Minitest::Test
 
   def test_add_media_error_invalid_url
     post '/watchlist/1/new_media', { name: 'valid_name',
-                                    platform: 'valid_platform',
-                                    url: 'bad url' }, admin_session
+                                     platform: 'valid_platform',
+                                     url: 'bad url' }, admin_session
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Invalid URL')
@@ -283,8 +287,8 @@ class AppTest < Minitest::Test
 
   def test_add_media_error_invalid_name_platform_url
     post '/watchlist/1/new_media', { name: '   ',
-                                    platform: '  ',
-                                    url: 'bad url' }, admin_session
+                                     platform: '  ',
+                                     url: 'bad url' }, admin_session
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Name must be between 1 and ')
@@ -324,7 +328,7 @@ class AppTest < Minitest::Test
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, 'Protein Bar Review - LBP')
 
-    post '/watchlist/1/media/2/edit', {name: 'valid_name', platform: 'valid_platform', url: 'https://www.validurl.com'}
+    post '/watchlist/1/media/2/edit', { name: 'valid_name', platform: 'valid_platform', url: 'https://www.validurl.com' }
 
     assert_equal(302, last_response.status)
     assert_includes(session[:success], 'Update was successful')
@@ -379,7 +383,7 @@ class AppTest < Minitest::Test
   end
 
   def test_sign_in
-    post '/users/sign_in', {username: 'admin', password: 'supersecret'}
+    post '/users/sign_in', { username: 'admin', password: 'supersecret' }
 
     assert_equal(302, last_response.status)
     assert_includes(session[:success], 'Welcome, admin!')
@@ -391,7 +395,7 @@ class AppTest < Minitest::Test
   end
 
   def test_sign_in_error
-    post '/users/sign_in', {username: 'admin', password: 'incorrect_password'}
+    post '/users/sign_in', { username: 'admin', password: 'incorrect_password' }
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Invalid credentials')
@@ -425,7 +429,7 @@ class AppTest < Minitest::Test
   end
 
   def test_register_user
-    post '/users/register', {username: 'new_user', password: 'new_password'}
+    post '/users/register', { username: 'new_user', password: 'new_password' }
 
     assert_equal(302, last_response.status)
     assert_includes(session[:success], 'Profile creation successful')
@@ -434,7 +438,7 @@ class AppTest < Minitest::Test
 
     assert_equal(200, last_response.status)
 
-    post '/users/sign_in', {username: 'new_user', password: 'new_password'}
+    post '/users/sign_in', { username: 'new_user', password: 'new_password' }
 
     assert_equal(302, last_response.status)
     assert_includes(session[:success], 'Welcome, new_user!')
@@ -442,23 +446,24 @@ class AppTest < Minitest::Test
   end
 
   def test_register_user_error_username_already_exists
-    post '/users/register', {username: 'admin', password: 'new_password'}
+    post '/users/register', { username: 'admin', password: 'new_password' }
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'A profile already exists for user admin')
   end
 
   def test_register_user_error_invalid_username
-    post '/users/register', {username: '    ', password: 'new_password'}
+    post '/users/register', { username: '    ', password: 'new_password' }
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Username must be between 1 and ')
   end
 
   def test_register_user_error_invalid_password
-    post '/users/register', {username: 'new_user', password: 'a'}
+    post '/users/register', { username: 'new_user', password: 'a' }
 
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, 'Password must be at least ')
   end
 end
+# rubocop:enable Metrics/AbcSize, Metrics/ClassLength, Metrics/MethodLength
