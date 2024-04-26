@@ -135,6 +135,12 @@ fieldset {
   margin-top: 10px;
 }
 
+fieldset div label {
+  text-align: right;
+  display: inline-block;
+  min-width: 120px;
+}
+
 input {
   font-size: 0.8rem;
 }
