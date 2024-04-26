@@ -10,6 +10,10 @@ Users can create a profile, create watchlists based on their needs (ex: Favorite
 
 The home page can be viewed by clicking "Watchlist App" in the top left corner or by clicking "HOME" at the bottom of the screen.
 
+The form at the bottom of the home page creates a new watchlist.
+
+The form at the bottom of an individual watchlist creates a new media within that watchlist.
+
 ## Vocabulary
 
 **Watchlist** - a list of media
@@ -44,8 +48,7 @@ To run the application:
 # Assumptions
 
 - The user has installed PostgreSQL and has the database server running.
-- The application should automatically create the database and the tables in PostgreSQL upon startup.
-	- I was unsure if it was acceptable to have the grader create the database and schema using an SQL file, so I decided to just have the application create the database and tables if they don't already exist.
+- The application should automatically create the database and the tables in PostgreSQL upon startup if they don't already exist.
 
 # Design Decisions
 
